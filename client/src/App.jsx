@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from 'react';
 
 const RAW_API = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
-const API = RAW_API.replace(/\/+$/, '');
+let cleanApi = RAW_API.replace(/\/+$/, '');
+if (!cleanApi.endsWith('/api')) {
+  cleanApi = `${cleanApi}/api`;
+}
+const API = cleanApi;
 
 async function request(path, token, options = {}) {
   const cleanPath = path.startsWith('/') ? path : `/${path}`;

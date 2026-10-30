@@ -257,6 +257,10 @@ app.post('/api/payments/verify', auth, async (req, res) => {
   }
 });
 
+app.get('/', (req, res) => {
+  res.send('FitTrack Backend is running successfully!');
+});
+
 const port=Number(process.env.PORT||4000);
 initDb().then(()=>app.listen(port,()=>console.log(`FitTrack API listening on http://localhost:${port}`)))
   .catch(err=>{console.error('Database initialization failed:',err);process.exit(1);});

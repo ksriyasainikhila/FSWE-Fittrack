@@ -1,17 +1,30 @@
 import pg from 'pg';
 import dotenv from 'dotenv';
+
 dotenv.config();
+
 const { Pool } = pg;
 
-const isProduction =
-  process.env.NODE_ENV === 'production' ||
-  (process.env.DATABASE_URL && !process.env.DATABASE_URL.includes('localhost') && !process.env.DATABASE_URL.includes('127.0.0.1'));
+const connectionString = process.env.DATABASE_URL;
+
+if (!connectionString) {
+  console.error('\n❌ ERROR: DATABASE_URL environment variable is missing!');
+  console.error('👉 Please add DATABASE_URL in your Render Web Service -> Environment settings.\n');
+}
+
+// Enable SSL for any cloud/remote database (Render, Supabase, Neon, etc.)
+const isLocal = !connectionString || connectionString.includes('localhost') || connectionString.includes('127.0.0.1');
 
 export const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: isProduction ? { rejectUnauthorized: false } : false
+  connectionString,
+  ssl: isLocal ? false : { rejectUnauthorized: false }
 });
+
 export async function initDb() {
+  if (!connectionString) {
+    throw new Error('DATABASE_URL is missing. Please configure DATABASE_URL in your Render Environment settings.');
+  }
+
   await pool.query(`
     CREATE TABLE IF NOT EXISTS users (
       id SERIAL PRIMARY KEY,

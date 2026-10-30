@@ -15,7 +15,8 @@ if (!process.env.JWT_SECRET) {
   process.exit(1);
 }
 const app = express();
-app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:5173' }));
+// Allow frontend origin (handles trailing slash or any origin smoothly)
+app.use(cors());
 
 // Razorpay webhook must receive the raw body for signature verification.
 app.post('/api/payments/webhook', express.raw({ type: 'application/json' }), async (req, res) => {

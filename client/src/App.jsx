@@ -1,15 +1,22 @@
 import React, { useEffect, useState } from 'react';
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+const RAW_API = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+const API = RAW_API.replace(/\/+$/, '');
 
 async function request(path, token, options = {}) {
-  const res = await fetch(`${API}${path}`, {
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  const res = await fetch(`${API}${cleanPath}`, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(options.headers || {})
     }
+  }).catch(err => {
+    if (err.message?.includes('fetch') || err.name === 'TypeError') {
+      throw new Error(`Cannot connect to backend API at ${API}. If using Render free tier, please wait 30-60s for backend wake-up, or verify VITE_API_URL.`);
+    }
+    throw err;
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.error || 'Something went wrong');
